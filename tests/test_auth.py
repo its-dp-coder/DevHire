@@ -1,3 +1,6 @@
+from app.core.permissions import require_role
+
+
 def test_register_user(client):
     response = client.post(
         "/auth/register",
@@ -131,3 +134,34 @@ def test_get_current_user_without_token(client):
     response = client.get("/auth/me")
 
     assert response.status_code == 401
+
+
+def test_require_role_allows_allowed_role():
+    checker = require_role("recruiter")
+
+    user = type(
+        "User",
+        (),
+        {"role": "recruiter"},
+    )()
+
+    result = checker(user)
+
+    assert result == user
+
+
+def test_require_role_rejects_disallowed_role():
+    checker = require_role("recruiter")
+
+    user = type(
+        "User",
+        (),
+        {"role": "candidate"},
+    )()
+
+    try:
+        checker(user)
+        assert False
+    except Exception as exc:
+        assert exc.status_code == 403
+        assert exc.detail == "Insufficient permissions"
