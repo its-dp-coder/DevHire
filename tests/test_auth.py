@@ -89,3 +89,45 @@ def test_login_wrong_password(client):
 
     assert response.status_code == 401
     assert response.json()["detail"] == "Invalid email or password"
+
+
+def test_get_current_user(client):
+    client.post(
+        "/auth/register",
+        json={
+            "full_name": "Current User",
+            "email": "current@example.com",
+            "password": "StrongPassword123",
+        },
+    )
+
+    login_response = client.post(
+        "/auth/login",
+        json={
+            "email": "current@example.com",
+            "password": "StrongPassword123",
+        },
+    )
+
+    token = login_response.json()["access_token"]
+
+    response = client.get(
+        "/auth/me",
+        headers={
+            "Authorization": f"Bearer {token}",
+        },
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["email"] == "current@example.com"
+    assert data["full_name"] == "Current User"
+    assert data["role"] == "candidate"
+
+
+def test_get_current_user_without_token(client):
+    response = client.get("/auth/me")
+
+    assert response.status_code == 401
