@@ -19,7 +19,9 @@ import {
 
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-
+import Jobs from "./pages/Jobs";
+import Dashboard from "./pages/Dashboard";
+import JobDetails from "./pages/JobDetails";
 
 function Navbar() {
   const [open, setOpen] = useState(false);
@@ -29,6 +31,7 @@ function Navbar() {
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 sm:px-6 lg:px-8">
         <Link
           to="/"
+          onClick={() => setOpen(false)}
           className="text-2xl font-bold tracking-tight"
         >
           Dev<span className="text-blue-500">Hire</span>
@@ -36,18 +39,25 @@ function Navbar() {
 
         <div className="hidden items-center gap-8 md:flex">
           <a
-            href="#features"
+            href="/#features"
             className="text-sm text-slate-400 transition hover:text-white"
           >
             Features
           </a>
 
           <a
-            href="#how-it-works"
+            href="/#how-it-works"
             className="text-sm text-slate-400 transition hover:text-white"
           >
             How it works
           </a>
+
+          <Link
+            to="/jobs"
+            className="text-sm text-slate-400 transition hover:text-white"
+          >
+            Jobs
+          </Link>
 
           <Link
             to="/login"
@@ -68,12 +78,9 @@ function Navbar() {
           onClick={() => setOpen(!open)}
           className="rounded-lg border border-white/10 p-2 md:hidden"
           aria-label="Toggle menu"
+          aria-expanded={open}
         >
-          {open ? (
-            <X size={22} />
-          ) : (
-            <Menu size={22} />
-          )}
+          {open ? <X size={22} /> : <Menu size={22} />}
         </button>
       </div>
 
@@ -81,7 +88,7 @@ function Navbar() {
         <div className="border-t border-white/10 bg-slate-950 px-5 py-5 md:hidden">
           <div className="flex flex-col gap-5">
             <a
-              href="#features"
+              href="/#features"
               onClick={() => setOpen(false)}
               className="text-slate-300"
             >
@@ -89,12 +96,20 @@ function Navbar() {
             </a>
 
             <a
-              href="#how-it-works"
+              href="/#how-it-works"
               onClick={() => setOpen(false)}
               className="text-slate-300"
             >
               How it works
             </a>
+
+            <Link
+              to="/jobs"
+              onClick={() => setOpen(false)}
+              className="text-slate-300"
+            >
+              Jobs
+            </Link>
 
             <Link
               to="/login"
@@ -117,7 +132,6 @@ function Navbar() {
     </nav>
   );
 }
-
 
 function Home() {
   return (
@@ -336,7 +350,6 @@ function Home() {
   );
 }
 
-
 function StatCard({
   icon,
   value,
@@ -367,7 +380,6 @@ function StatCard({
   );
 }
 
-
 function FeatureCard({
   icon,
   title,
@@ -393,7 +405,6 @@ function FeatureCard({
     </div>
   );
 }
-
 
 function StepCard({
   number,
@@ -421,56 +432,6 @@ function StepCard({
   );
 }
 
-
-function Dashboard() {
-  const token = localStorage.getItem("access_token");
-
-  if (!token) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return (
-    <div className="min-h-screen bg-slate-950 text-white">
-      <Navbar />
-
-      <main className="mx-auto max-w-7xl px-5 pb-20 pt-32 sm:px-6 lg:px-8">
-        <h1 className="text-4xl font-bold">
-          Welcome to DevHire 👋
-        </h1>
-
-        <p className="mt-3 text-slate-400">
-          Your developer hiring dashboard.
-        </p>
-      </main>
-    </div>
-  );
-}
-
-
-function Jobs() {
-  return (
-    <div className="min-h-screen bg-slate-950 px-5 pb-20 pt-32 text-white sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl">
-        <Link
-          to="/"
-          className="text-sm text-blue-400 hover:text-blue-300"
-        >
-          ← Back to home
-        </Link>
-
-        <h1 className="mt-8 text-4xl font-bold">
-          Developer Jobs
-        </h1>
-
-        <p className="mt-3 text-slate-400">
-          Job discovery will be connected to the API next.
-        </p>
-      </div>
-    </div>
-  );
-}
-
-
 function App() {
   return (
     <Routes>
@@ -482,7 +443,8 @@ function App() {
 
       <Route path="/dashboard" element={<Dashboard />} />
 
-      <Route path="/jobs" element={<Jobs />} />
+<Route path="/jobs" element={<Jobs />} />
+<Route path="/jobs/:jobId" element={<JobDetails />} />
 
       <Route
         path="*"
@@ -490,7 +452,7 @@ function App() {
       />
     </Routes>
   );
-}
 
+}
 
 export default App;
