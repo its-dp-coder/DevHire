@@ -22,6 +22,12 @@ import Register from "./pages/Register";
 import Jobs from "./pages/Jobs";
 import Dashboard from "./pages/Dashboard";
 import JobDetails from "./pages/JobDetails";
+import Profile from "./pages/Profile";
+import Matching from "./pages/Matching";
+import Resume from "./pages/Resume";
+import RecruiterDashboard from "./pages/RecruiterDashboard";
+import CreateJob from "./pages/CreateJob";
+import Applications from "./pages/Applications";
 
 function Navbar() {
   const [open, setOpen] = useState(false);
@@ -434,23 +440,32 @@ function StepCard({
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
+<Routes>
+  <Route path="/" element={<Home />} />
 
-      <Route path="/login" element={<Login />} />
+  <Route path="/login" element={<Login />} />
 
-      <Route path="/register" element={<Register />} />
+  <Route path="/register" element={<Register />} />
 
-      <Route path="/dashboard" element={<Dashboard />} />
+  <Route path="/dashboard" element={<Dashboard />} />
 
-<Route path="/jobs" element={<Jobs />} />
-<Route path="/jobs/:jobId" element={<JobDetails />} />
+  <Route path="/recruiter" element={<RecruiterDashboard />} />
+<Route path="/recruiter/jobs/new" element={<CreateJob />} />
+  <Route path="/profile" element={<Profile />} />
 
-      <Route
-        path="*"
-        element={<Navigate to="/" replace />}
-      />
-    </Routes>
+  <Route path="/matching" element={<Matching />} />
+
+  <Route path="/resume" element={<Resume />} />
+<Route path="/applications" element={<Applications />} />
+  <Route path="/jobs" element={<Jobs />} />
+
+  <Route path="/jobs/:jobId" element={<JobDetails />} />
+
+  <Route
+    path="*"
+    element={<Navigate to="/" replace />}
+  />
+</Routes>
   );
 
 }

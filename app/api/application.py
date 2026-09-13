@@ -14,6 +14,7 @@ from app.services.application_service import (
     apply_for_job,
     list_candidate_applications,
     list_job_applications,
+    list_recruiter_applications,
     update_status,
 )
 
@@ -60,6 +61,22 @@ def get_my_applications(
 
 
 @router.get(
+    "/recruiter",
+    response_model=list[ApplicationResponse],
+)
+def get_recruiter_applications(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    require_role("recruiter")(current_user)
+
+    return list_recruiter_applications(
+        db,
+        current_user.id,
+    )
+
+
+@router.get(
     "/job/{job_id}",
     response_model=list[ApplicationResponse],
 )
@@ -74,6 +91,7 @@ def get_applications_for_job(
         db,
         job_id,
     )
+
 
 @router.patch(
     "/{application_id}/status",

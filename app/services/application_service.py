@@ -88,6 +88,26 @@ def list_job_applications(
     )
 
 
+def list_recruiter_applications(
+    db: Session,
+    recruiter_id: int,
+) -> list[Application]:
+    return (
+        db.query(Application)
+        .join(
+            Job,
+            Application.job_id == Job.id,
+        )
+        .filter(
+            Job.created_by == recruiter_id,
+        )
+        .order_by(
+            Application.created_at.desc(),
+        )
+        .all()
+    )
+
+
 def update_status(
     db: Session,
     application_id: int,

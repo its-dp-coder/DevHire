@@ -69,6 +69,30 @@ function Dashboard() {
             </Link>
 
             <Link
+              to="/applications"
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-400 transition hover:bg-white/5 hover:text-white"
+            >
+              <FileText size={19} />
+              My Applications
+            </Link>
+
+            <Link
+              to="/matching"
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-400 transition hover:bg-white/5 hover:text-white"
+            >
+              <Sparkles size={19} />
+              AI Job Matching
+            </Link>
+
+            <Link
+              to="/resume"
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-400 transition hover:bg-white/5 hover:text-white"
+            >
+              <FileText size={19} />
+              Resume
+            </Link>
+
+            <Link
               to="/profile"
               className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-400 transition hover:bg-white/5 hover:text-white"
             >
@@ -125,7 +149,7 @@ function Dashboard() {
             </div>
 
             {/* Mobile Navigation */}
-            <div className="mb-8 grid grid-cols-3 gap-3 lg:hidden">
+            <div className="mb-8 grid grid-cols-3 gap-3 sm:grid-cols-5 lg:hidden">
               <Link
                 to="/dashboard"
                 className="flex flex-col items-center gap-2 rounded-xl border border-blue-500/20 bg-blue-500/10 p-3 text-xs font-medium text-blue-400"
@@ -140,6 +164,22 @@ function Dashboard() {
               >
                 <BriefcaseBusiness size={18} />
                 Jobs
+              </Link>
+
+              <Link
+                to="/applications"
+                className="flex flex-col items-center gap-2 rounded-xl border border-white/10 bg-slate-900 p-3 text-xs font-medium text-slate-400"
+              >
+                <FileText size={18} />
+                Applications
+              </Link>
+
+              <Link
+                to="/matching"
+                className="flex flex-col items-center gap-2 rounded-xl border border-white/10 bg-slate-900 p-3 text-xs font-medium text-slate-400"
+              >
+                <Sparkles size={18} />
+                Matching
               </Link>
 
               <Link
@@ -191,11 +231,13 @@ function Dashboard() {
                 </h2>
 
                 <p className="mt-1 text-sm text-slate-500">
-                  Start building your developer profile and explore jobs.
+                  Manage your developer profile, applications,
+                  resume, and AI-powered job matches.
                 </p>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
+                {/* Explore Jobs */}
                 <Link
                   to="/jobs"
                   className="group rounded-2xl border border-white/10 bg-slate-900/70 p-6 transition hover:-translate-y-0.5 hover:border-blue-500/30 hover:bg-slate-900"
@@ -221,9 +263,10 @@ function Dashboard() {
                   </p>
                 </Link>
 
+                {/* Profile */}
                 <Link
                   to="/profile"
-                  className="group rounded-2xl border border-white/10 bg-slate-900/70 p-6 transition hover:-translate-y-0.5 hover:border-blue-500/30 hover:bg-slate-900"
+                  className="group rounded-2xl border border-white/10 bg-slate-900/70 p-6 transition hover:-translate-y-0.5 hover:border-violet-500/30 hover:bg-slate-900"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-500/10 text-violet-400">
@@ -241,8 +284,86 @@ function Dashboard() {
                   </h3>
 
                   <p className="mt-2 text-sm leading-6 text-slate-400">
-                    Add your skills, experience, education, and resume
-                    to improve your AI job matches.
+                    Add your skills, experience, education, and
+                    resume to improve your AI job matches.
+                  </p>
+                </Link>
+
+                {/* Applications */}
+                <Link
+                  to="/applications"
+                  className="group rounded-2xl border border-white/10 bg-slate-900/70 p-6 transition hover:-translate-y-0.5 hover:border-emerald-500/30 hover:bg-slate-900"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400">
+                      <FileText size={22} />
+                    </div>
+
+                    <ChevronRight
+                      size={20}
+                      className="text-slate-600 transition group-hover:translate-x-1 group-hover:text-emerald-400"
+                    />
+                  </div>
+
+                  <h3 className="mt-5 text-lg font-semibold">
+                    My Applications
+                  </h3>
+
+                  <p className="mt-2 text-sm leading-6 text-slate-400">
+                    Track the jobs you have applied for and monitor
+                    your application status.
+                  </p>
+                </Link>
+
+                {/* AI Matching */}
+                <Link
+                  to="/matching"
+                  className="group rounded-2xl border border-white/10 bg-slate-900/70 p-6 transition hover:-translate-y-0.5 hover:border-blue-500/30 hover:bg-slate-900"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
+                      <Sparkles size={22} />
+                    </div>
+
+                    <ChevronRight
+                      size={20}
+                      className="text-slate-600 transition group-hover:translate-x-1 group-hover:text-blue-400"
+                    />
+                  </div>
+
+                  <h3 className="mt-5 text-lg font-semibold">
+                    AI Job Matching
+                  </h3>
+
+                  <p className="mt-2 text-sm leading-6 text-slate-400">
+                    Get developer jobs ranked according to your
+                    skills and see your match score.
+                  </p>
+                </Link>
+
+                {/* Resume */}
+                <Link
+                  to="/resume"
+                  className="group rounded-2xl border border-white/10 bg-slate-900/70 p-6 transition hover:-translate-y-0.5 hover:border-amber-500/30 hover:bg-slate-900"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500/10 text-amber-400">
+                      <FileText size={22} />
+                    </div>
+
+                    <ChevronRight
+                      size={20}
+                      className="text-slate-600 transition group-hover:translate-x-1 group-hover:text-amber-400"
+                    />
+                  </div>
+
+                  <h3 className="mt-5 text-lg font-semibold">
+                    Manage Resume
+                  </h3>
+
+                  <p className="mt-2 text-sm leading-6 text-slate-400">
+                    Upload your latest resume and keep your
+                    candidate profile up to date.
                   </p>
                 </Link>
               </div>
@@ -257,26 +378,24 @@ function Dashboard() {
                   </div>
 
                   <h2 className="text-2xl font-bold">
-                    AI-powered hiring is coming.
+                    AI-powered job matching is ready.
                   </h2>
 
                   <p className="mt-3 text-sm leading-6 text-slate-400 sm:text-base">
-                    DevHire will analyze developer skills and job
+                    DevHire analyzes your developer skills and job
                     requirements to calculate intelligent candidate-job
                     matches.
                   </p>
                 </div>
 
                 <div className="shrink-0">
-                  <div className="rounded-xl border border-white/10 bg-slate-950/60 px-5 py-4">
-                    <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
-                      AI Matching
-                    </p>
-
-                    <p className="mt-1 text-lg font-semibold text-blue-400">
-                      Coming Soon
-                    </p>
-                  </div>
+                  <Link
+                    to="/matching"
+                    className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold transition hover:bg-blue-500"
+                  >
+                    View Matches
+                    <ChevronRight size={17} />
+                  </Link>
                 </div>
               </div>
             </section>
