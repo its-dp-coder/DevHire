@@ -9,7 +9,7 @@ from app.api.matching import router as matching_router
 from app.api.resume import router as resume_router
 from app.core.config import settings
 from app.api.rag import router as rag_router
-
+from app.api.health import router as health_router
 
 app = FastAPI(
     title=settings.app_name,
@@ -25,6 +25,7 @@ app.include_router(candidate_profile_router)
 app.include_router(resume_router)
 app.include_router(matching_router)
 app.include_router(rag_router)
+app.include_router(health_router)
 
 
 

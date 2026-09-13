@@ -6,10 +6,13 @@ from app.models.job import Job
 from app.repositories.application_repository import (
     create_application,
     get_application_by_candidate_and_job,
+    get_application_by_id,
     get_candidate_applications,
     get_job_applications,
+    update_application_status,
 )
 from app.schemas.application import ApplicationCreate
+from app.workers import enqueue_application_notification
 
 
 def apply_for_job(
@@ -32,10 +35,12 @@ def apply_for_job(
             detail="Active job not found",
         )
 
-    existing_application = get_application_by_candidate_and_job(
-        db,
-        candidate_id,
-        application_data.job_id,
+    existing_application = (
+        get_application_by_candidate_and_job(
+            db,
+            candidate_id,
+            application_data.job_id,
+        )
     )
 
     if existing_application:
@@ -51,7 +56,16 @@ def apply_for_job(
         status="applied",
     )
 
-    return create_application(db, application)
+    application = create_application(
+        db,
+        application,
+    )
+
+    enqueue_application_notification(
+        application.id,
+    )
+
+    return application
 
 
 def list_candidate_applications(
@@ -73,14 +87,6 @@ def list_job_applications(
         job_id,
     )
 
-from app.repositories.application_repository import (
-    create_application,
-    get_application_by_candidate_and_job,
-    get_application_by_id,
-    get_candidate_applications,
-    get_job_applications,
-    update_application_status,
-)
 
 def update_status(
     db: Session,
