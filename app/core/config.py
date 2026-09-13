@@ -9,10 +9,12 @@ class Settings(BaseSettings):
     test_database_url: str
     algorithm: str
     access_token_expire_minutes: int
+    openai_api_key: str | None = None
 
     model_config = SettingsConfigDict(
         env_file=".env",
         case_sensitive=False,
+        extra="ignore",
     )
 
 
