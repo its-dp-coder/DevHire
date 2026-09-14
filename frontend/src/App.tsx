@@ -30,6 +30,7 @@ import CreateJob from "./pages/CreateJob";
 import Applications from "./pages/Applications";
 import Company from "./pages/Company";
 import AIAssistant from "./pages/AIAssistant";
+import CandidateDetails from "./pages/CandidateDetails";
 
 function Navbar() {
   const [open, setOpen] = useState(false);
@@ -442,36 +443,61 @@ function StepCard({
 
 function App() {
   return (
-<Routes>
-  <Route path="/" element={<Home />} />
+    <Routes>
+      <Route path="/" element={<Home />} />
 
-  <Route path="/login" element={<Login />} />
+      <Route path="/login" element={<Login />} />
 
-  <Route path="/register" element={<Register />} />
+      <Route path="/register" element={<Register />} />
 
-  <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/dashboard" element={<Dashboard />} />
 
-  <Route path="/recruiter" element={<RecruiterDashboard />} />
-<Route path="/recruiter/jobs/new" element={<CreateJob />} />
-  <Route path="/profile" element={<Profile />} />
+      <Route
+        path="/recruiter"
+        element={<RecruiterDashboard />}
+      />
 
-  <Route path="/matching" element={<Matching />} />
+      <Route
+        path="/recruiter/jobs/new"
+        element={<CreateJob />}
+      />
 
-  <Route path="/resume" element={<Resume />} />
-<Route path="/applications" element={<Applications />} />
-<Route path="/company" element={<Company />} />
-<Route path="/ai-assistant" element={<AIAssistant />} />
-  <Route path="/jobs" element={<Jobs />} />
+      <Route
+        path="/recruiter/candidates/:candidateId"
+        element={<CandidateDetails />}
+      />
 
-  <Route path="/jobs/:jobId" element={<JobDetails />} />
+      <Route path="/profile" element={<Profile />} />
 
-  <Route
-    path="*"
-    element={<Navigate to="/" replace />}
-  />
-</Routes>
+      <Route path="/matching" element={<Matching />} />
+
+      <Route path="/resume" element={<Resume />} />
+
+      <Route
+        path="/applications"
+        element={<Applications />}
+      />
+
+      <Route path="/company" element={<Company />} />
+
+      <Route
+        path="/ai-assistant"
+        element={<AIAssistant />}
+      />
+
+      <Route path="/jobs" element={<Jobs />} />
+
+      <Route
+        path="/jobs/:jobId"
+        element={<JobDetails />}
+      />
+
+      <Route
+        path="*"
+        element={<Navigate to="/" replace />}
+      />
+    </Routes>
   );
-
 }
 
 export default App;

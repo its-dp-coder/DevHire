@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import {
+  ArrowLeft,
   Building2,
   CheckCircle2,
   Globe,
   Loader2,
   Plus,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 import api from "../services/api";
 
@@ -96,6 +98,18 @@ function Company() {
   return (
     <div className="min-h-screen bg-slate-950 text-white">
       <div className="mx-auto max-w-6xl px-5 py-10 sm:px-6 lg:px-8">
+
+        {/* Back Navigation */}
+        <div className="mb-8">
+          <Link
+            to="/recruiter"
+            className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-slate-900/70 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:border-white/20 hover:bg-slate-900 hover:text-white"
+          >
+            <ArrowLeft size={17} />
+            Back to Recruiter Dashboard
+          </Link>
+        </div>
+
         {/* Header */}
         <div className="mb-8">
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400">
@@ -113,6 +127,7 @@ function Company() {
         </div>
 
         <div className="grid gap-8 lg:grid-cols-[380px_1fr]">
+
           {/* Create Company */}
           <section className="h-fit rounded-2xl border border-white/10 bg-slate-900/70 p-6 sm:p-7">
             <div className="mb-6">

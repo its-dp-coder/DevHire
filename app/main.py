@@ -12,6 +12,8 @@ from app.api.matching import router as matching_router
 from app.api.rag import router as rag_router
 from app.api.resume import router as resume_router
 from app.core.config import settings
+from app.api.profile_view import router as profile_view_router
+from app.api.recruiter_candidates import router as recruiter_candidates_router
 
 
 app = FastAPI(
@@ -47,7 +49,8 @@ app.include_router(resume_router)
 app.include_router(matching_router)
 app.include_router(rag_router)
 app.include_router(health_router)
-
+app.include_router(profile_view_router)
+app.include_router(recruiter_candidates_router)
 
 @app.get("/health")
 def health_check():

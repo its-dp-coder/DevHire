@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import {
   ArrowLeft,
@@ -17,19 +17,79 @@ type RAGResponse = {
   sources: string[];
 };
 
+type Job = {
+  id: number;
+  title: string;
+  required_skills?: string | null;
+  description?: string | null;
+};
+
 function AIAssistant() {
   const [query, setQuery] = useState("");
+  const [submittedQuery, setSubmittedQuery] = useState("");
   const [answer, setAnswer] = useState("");
   const [sources, setSources] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [suggestions, setSuggestions] = useState<string[]>([]);
 
-  const suggestions = [
-    "Which jobs require Python?",
-    "Find candidates with FastAPI skills",
-    "Which candidates have PostgreSQL experience?",
-    "What developer roles are currently available?",
-  ];
+  useEffect(() => {
+    const loadSuggestions = async () => {
+      try {
+        const response = await api.get<Job[]>("/jobs");
+
+        const jobs = Array.isArray(response.data)
+          ? response.data
+          : [];
+
+        const generatedSuggestions: string[] = [];
+
+        jobs.forEach((job) => {
+          if (!job.title) {
+            return;
+          }
+
+          generatedSuggestions.push(
+            `Find candidates for ${job.title}`,
+          );
+
+          if (job.required_skills) {
+            const skills = job.required_skills
+              .split(/[,;\n]/)
+              .map((skill) => skill.trim())
+              .filter(Boolean);
+
+            if (skills.length > 0) {
+              generatedSuggestions.push(
+                `Find candidates with ${skills[0]} skills`,
+              );
+            }
+
+            if (skills.length > 1) {
+              generatedSuggestions.push(
+                `Which candidates match the ${job.title} role?`,
+              );
+            }
+          }
+        });
+
+        const uniqueSuggestions = [
+          ...new Set(generatedSuggestions),
+        ];
+
+        setSuggestions(uniqueSuggestions.slice(0, 4));
+      } catch {
+        setSuggestions([
+          "Which jobs are currently available?",
+          "Find candidates with relevant skills",
+          "Which candidates match my jobs?",
+          "Help me review the available candidates",
+        ]);
+      }
+    };
+
+    loadSuggestions();
+  }, []);
 
   const askAssistant = async (question: string) => {
     const trimmedQuestion = question.trim();
@@ -43,6 +103,7 @@ function AIAssistant() {
       setError("");
       setAnswer("");
       setSources([]);
+      setSubmittedQuery(trimmedQuestion);
 
       const response = await api.post<RAGResponse>("/ai/ask", {
         query: trimmedQuestion,
@@ -119,8 +180,8 @@ function AIAssistant() {
           </p>
         </div>
 
-        {/* Suggestions */}
-        {!answer && !loading && (
+        {/* Dynamic Suggestions */}
+        {!answer && !loading && suggestions.length > 0 && (
           <div className="mb-8 grid gap-3 sm:grid-cols-2">
             {suggestions.map((suggestion) => (
               <button
@@ -134,7 +195,8 @@ function AIAssistant() {
                     size={16}
                     className="shrink-0 text-blue-400"
                   />
-                  {suggestion}
+
+                  <span>{suggestion}</span>
                 </div>
               </button>
             ))}
@@ -144,13 +206,11 @@ function AIAssistant() {
         {/* Chat */}
         <section className="rounded-2xl border border-white/10 bg-slate-900/70 p-5 sm:p-7">
           {/* User Query */}
-          {answer && (
+          {submittedQuery && (
             <div className="mb-6 flex justify-end">
               <div className="flex max-w-3xl items-start gap-3">
                 <div className="rounded-2xl rounded-tr-md bg-blue-600 px-5 py-3 text-sm leading-6 text-white">
-                  {answer
-                    ? "Recruitment query submitted"
-                    : ""}
+                  {submittedQuery}
                 </div>
 
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-500/10 text-blue-400">
@@ -167,6 +227,7 @@ function AIAssistant() {
                 size={20}
                 className="animate-spin text-blue-400"
               />
+
               DevHire AI is analyzing the hiring data...
             </div>
           )}
@@ -214,6 +275,7 @@ function AIAssistant() {
                     <span className="mr-2 font-semibold text-blue-400">
                       Source {index + 1}
                     </span>
+
                     {source}
                   </div>
                 ))}

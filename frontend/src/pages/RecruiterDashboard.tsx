@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import {
-  Bot,
   BriefcaseBusiness,
   Building2,
   CheckCircle2,
-  Sparkles,
+  LogOut,
+  UserCheck,
+  UserX,
   Users,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import api from "../services/api";
 
@@ -20,6 +21,8 @@ type Application = {
 };
 
 function RecruiterDashboard() {
+  const navigate = useNavigate();
+
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -49,6 +52,11 @@ function RecruiterDashboard() {
 
     fetchApplications();
   }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("access_token");
+    navigate("/login");
+  };
 
   const updateStatus = async (
     applicationId: number,
@@ -85,11 +93,18 @@ function RecruiterDashboard() {
     (application) => application.status === "reviewing",
   ).length;
 
+  const shortlistedCount = applications.filter(
+    (application) => application.status === "shortlisted",
+  ).length;
+
+  const rejectedCount = applications.filter(
+    (application) => application.status === "rejected",
+  ).length;
+
   return (
     <div className="min-h-screen bg-slate-950 text-white">
-      {/* Header */}
       <header className="border-b border-white/10">
-        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 sm:px-6 lg:px-8">
+        <div className="mx-auto flex min-h-20 max-w-7xl flex-wrap items-center justify-between gap-3 px-5 py-3 sm:px-6 lg:px-8">
           <Link
             to="/"
             className="text-2xl font-bold tracking-tight"
@@ -97,10 +112,10 @@ function RecruiterDashboard() {
             Dev<span className="text-blue-500">Hire</span>
           </Link>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-end gap-2">
             <Link
-              to="/dashboard"
-              className="rounded-xl px-4 py-2 text-sm text-slate-400 transition hover:bg-white/5 hover:text-white"
+              to="/recruiter"
+              className="rounded-xl bg-blue-500/10 px-4 py-2 text-sm font-medium text-blue-400 transition hover:bg-blue-500/20"
             >
               Dashboard
             </Link>
@@ -122,17 +137,24 @@ function RecruiterDashboard() {
 
             <Link
               to="/ai-assistant"
-              className="inline-flex items-center gap-2 rounded-xl border border-blue-500/20 bg-blue-500/10 px-4 py-2 text-sm font-medium text-blue-400 transition hover:border-blue-500/30 hover:bg-blue-500/15 hover:text-blue-300"
+              className="inline-flex items-center gap-2 rounded-xl border border-blue-500/20 bg-blue-500/10 px-4 py-2 text-sm font-medium text-blue-400 transition hover:bg-blue-500/20"
             >
-              <Bot size={16} />
               AI Assistant
             </Link>
+
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="inline-flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/5 px-4 py-2 text-sm font-medium text-red-400 transition hover:bg-red-500/10"
+            >
+              <LogOut size={16} />
+              Logout
+            </button>
           </div>
         </div>
       </header>
 
       <main className="mx-auto max-w-7xl px-5 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-14">
-        {/* Heading */}
         <div className="mb-10 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
@@ -168,15 +190,14 @@ function RecruiterDashboard() {
           </div>
         </div>
 
-        {/* Error */}
         {error && (
           <div className="mb-6 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm leading-6 text-red-400">
             {error}
           </div>
         )}
 
-        {/* Stats */}
-        <div className="mb-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {/* Recruitment Stats */}
+        <div className="mb-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
           <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6">
             <BriefcaseBusiness
               size={22}
@@ -189,6 +210,36 @@ function RecruiterDashboard() {
 
             <p className="mt-1 text-3xl font-bold">
               {applications.length}
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6">
+            <Users
+              size={22}
+              className="text-violet-400"
+            />
+
+            <p className="mt-5 text-sm text-slate-500">
+              Under Review
+            </p>
+
+            <p className="mt-1 text-3xl font-bold">
+              {reviewingCount}
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6">
+            <UserCheck
+              size={22}
+              className="text-amber-400"
+            />
+
+            <p className="mt-5 text-sm text-slate-500">
+              Shortlisted
+            </p>
+
+            <p className="mt-1 text-3xl font-bold">
+              {shortlistedCount}
             </p>
           </div>
 
@@ -208,17 +259,17 @@ function RecruiterDashboard() {
           </div>
 
           <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6">
-            <Users
+            <UserX
               size={22}
-              className="text-violet-400"
+              className="text-red-400"
             />
 
             <p className="mt-5 text-sm text-slate-500">
-              Under Review
+              Rejected
             </p>
 
             <p className="mt-1 text-3xl font-bold">
-              {reviewingCount}
+              {rejectedCount}
             </p>
           </div>
         </div>
@@ -279,13 +330,12 @@ function RecruiterDashboard() {
           >
             <div className="flex items-start justify-between">
               <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
-                <Bot size={21} />
+                <BotIcon />
               </div>
 
-              <Sparkles
-                size={18}
-                className="text-blue-400 opacity-60 transition group-hover:opacity-100"
-              />
+              <span className="text-sm text-slate-600 transition group-hover:text-blue-400">
+                Open →
+              </span>
             </div>
 
             <h2 className="mt-5 text-lg font-semibold">
@@ -293,8 +343,8 @@ function RecruiterDashboard() {
             </h2>
 
             <p className="mt-2 text-sm leading-6 text-slate-400">
-              Ask AI questions about candidates, jobs, skills,
-              and recruitment data.
+              Ask AI questions about candidates, jobs, skills, and
+              recruitment data.
             </p>
           </Link>
         </section>
@@ -343,7 +393,12 @@ function RecruiterDashboard() {
                     </h3>
 
                     <p className="mt-1 text-sm text-slate-500">
-                      Candidate #{application.candidate_id}
+                      <Link
+                        to={`/recruiter/candidates/${application.candidate_id}`}
+                        className="font-medium text-blue-400 transition hover:text-blue-300"
+                      >
+                        View Candidate #{application.candidate_id}
+                      </Link>
                       {" · "}
                       Job #{application.job_id}
                     </p>
@@ -391,13 +446,39 @@ function RecruiterDashboard() {
           )}
         </section>
 
-        {/* Footer */}
         <footer className="mt-12 border-t border-white/10 pt-6 text-center text-xs text-slate-600">
           © {new Date().getFullYear()} DevHire. AI-powered
           developer hiring platform.
         </footer>
       </main>
     </div>
+  );
+}
+
+function BotIcon() {
+  return (
+    <svg
+      width="21"
+      height="21"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect
+        width="18"
+        height="12"
+        x="3"
+        y="8"
+        rx="2"
+      />
+      <path d="M12 8V4" />
+      <path d="M8 12h.01" />
+      <path d="M16 12h.01" />
+      <path d="M8 16h8" />
+    </svg>
   );
 }
 

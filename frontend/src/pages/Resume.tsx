@@ -169,9 +169,7 @@ function Resume() {
           </h1>
 
           <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400 sm:text-base">
-            Upload and manage your resumes. Your uploaded resumes
-            are stored with your DevHire account and remain available
-            after you log out and sign in again.
+            Upload and manage your resumes. 
           </p>
         </div>
 

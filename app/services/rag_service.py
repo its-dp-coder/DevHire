@@ -1,8 +1,7 @@
+import os
 import re
 
-import os
-
-from openai import OpenAI
+from google import genai
 from sqlalchemy.orm import Session
 
 from app.models.candidate_profile import CandidateProfile
@@ -15,7 +14,6 @@ def _tokenize_query(query: str) -> list[str]:
 
 def retrieve_context(db: Session, query: str) -> list[str]:
     keywords = _tokenize_query(query)
-
     contexts = []
 
     jobs = db.query(Job).filter(Job.is_active.is_(True)).all()
@@ -76,17 +74,16 @@ def generate_rag_response(db: Session, query: str) -> tuple[str, list[str]]:
             [],
         )
 
-    api_key = os.getenv("OPENAI_API_KEY")
+    api_key = (os.getenv("GEMINI_API_KEY") or "").strip()
 
     if not api_key:
         answer = (
             "Relevant hiring information:\n\n"
             + "\n".join(f"- {context}" for context in contexts)
         )
-
         return answer, contexts
 
-    client = OpenAI(api_key=api_key)
+    client = genai.Client(api_key=api_key)
 
     context_text = "\n\n".join(contexts)
 
@@ -106,9 +103,9 @@ Recruiter question:
 {query}
 """
 
-    response = client.responses.create(
-        model="gpt-4.1-mini",
-        input=prompt,
-    )
+    response = client.models.generate_content(
+    model="gemini-3.6-flash",
+    contents=prompt,
+)
 
-    return response.output_text, contexts
+    return response.text, contexts

@@ -1,5 +1,5 @@
+import { useEffect, useState } from "react";
 import {
-  Bot,
   BriefcaseBusiness,
   Building2,
   ChevronRight,
@@ -12,29 +12,79 @@ import {
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
+import api from "../services/api";
+
 function Dashboard() {
   const navigate = useNavigate();
+
+  const [applicationCount, setApplicationCount] = useState(0);
+  const [recommendedJobsCount, setRecommendedJobsCount] = useState(0);
+  const [profileViewsCount, setProfileViewsCount] = useState(0);
 
   const handleLogout = () => {
     localStorage.removeItem("access_token");
     navigate("/login");
   };
 
+  useEffect(() => {
+    const loadDashboardStats = async () => {
+      try {
+        const [
+          applicationsResponse,
+          matchingResponse,
+          profileViewsResponse,
+        ] = await Promise.all([
+          api.get("/applications/my"),
+          api.get("/matching/jobs"),
+          api.get("/profile-views/count"),
+        ]);
+
+        setApplicationCount(
+          Array.isArray(applicationsResponse.data)
+            ? applicationsResponse.data.length
+            : 0,
+        );
+
+        setRecommendedJobsCount(
+          Array.isArray(matchingResponse.data)
+            ? matchingResponse.data.length
+            : 0,
+        );
+
+        setProfileViewsCount(
+          typeof profileViewsResponse.data?.profile_views === "number"
+            ? profileViewsResponse.data.profile_views
+            : 0,
+        );
+      } catch (error) {
+        console.error(
+          "Failed to load dashboard statistics:",
+          error,
+        );
+      }
+    };
+
+    loadDashboardStats();
+  }, []);
+
   const stats = [
     {
       label: "Applications",
-      value: "0",
+      value: applicationCount,
       icon: FileText,
+      comingSoon: false,
     },
     {
       label: "Recommended Jobs",
-      value: "0",
+      value: recommendedJobsCount,
       icon: Sparkles,
+      comingSoon: false,
     },
     {
       label: "Profile Views",
-      value: "0",
+      value: profileViewsCount,
       icon: UserRound,
+      comingSoon: false,
     },
   ];
 
@@ -83,14 +133,6 @@ function Dashboard() {
             >
               <Sparkles size={19} />
               AI Job Matching
-            </Link>
-
-            <Link
-              to="/ai-assistant"
-              className="flex items-center gap-3 rounded-xl border border-blue-500/20 bg-blue-500/10 px-4 py-3 text-sm font-medium text-blue-400 transition hover:bg-blue-500/15 hover:text-blue-300"
-            >
-              <Bot size={19} />
-              AI Assistant
             </Link>
 
             <Link
@@ -158,7 +200,7 @@ function Dashboard() {
             </div>
 
             {/* Mobile Navigation */}
-            <div className="mb-8 grid grid-cols-3 gap-3 sm:grid-cols-6 lg:hidden">
+            <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-5 lg:hidden">
               <Link
                 to="/dashboard"
                 className="flex flex-col items-center gap-2 rounded-xl border border-blue-500/20 bg-blue-500/10 p-3 text-xs font-medium text-blue-400"
@@ -192,14 +234,6 @@ function Dashboard() {
               </Link>
 
               <Link
-                to="/ai-assistant"
-                className="flex flex-col items-center gap-2 rounded-xl border border-blue-500/20 bg-blue-500/10 p-3 text-xs font-medium text-blue-400"
-              >
-                <Bot size={18} />
-                AI Assistant
-              </Link>
-
-              <Link
                 to="/profile"
                 className="flex flex-col items-center gap-2 rounded-xl border border-white/10 bg-slate-900 p-3 text-xs font-medium text-slate-400"
               >
@@ -222,10 +256,6 @@ function Dashboard() {
                       <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
                         <Icon size={20} />
                       </div>
-
-                      <span className="text-xs text-slate-600">
-                        Coming soon
-                      </span>
                     </div>
 
                     <p className="text-3xl font-bold">
@@ -358,32 +388,6 @@ function Dashboard() {
                   </p>
                 </Link>
 
-                {/* AI Assistant */}
-                <Link
-                  to="/ai-assistant"
-                  className="group rounded-2xl border border-blue-500/20 bg-blue-500/5 p-6 transition hover:-translate-y-0.5 hover:border-blue-500/40 hover:bg-blue-500/10"
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
-                      <Bot size={22} />
-                    </div>
-
-                    <Sparkles
-                      size={20}
-                      className="text-blue-400 transition group-hover:scale-110"
-                    />
-                  </div>
-
-                  <h3 className="mt-5 text-lg font-semibold">
-                    AI Recruitment Assistant
-                  </h3>
-
-                  <p className="mt-2 text-sm leading-6 text-slate-400">
-                    Ask AI about candidates, jobs, skills, and
-                    recruitment data using grounded hiring context.
-                  </p>
-                </Link>
-
                 {/* Resume */}
                 <Link
                   to="/resume"
@@ -421,31 +425,22 @@ function Dashboard() {
                   </div>
 
                   <h2 className="text-2xl font-bold">
-                    AI-powered developer tools are ready.
+                    AI-powered job matching is ready.
                   </h2>
 
                   <p className="mt-3 text-sm leading-6 text-slate-400 sm:text-base">
-                    Use AI job matching to discover relevant roles,
-                    or ask the AI Recruitment Assistant questions
-                    about DevHire hiring data.
+                    Use AI job matching to discover relevant developer
+                    roles based on your skills and profile.
                   </p>
                 </div>
 
-                <div className="flex shrink-0 flex-col gap-3 sm:flex-row">
+                <div className="flex shrink-0">
                   <Link
                     to="/matching"
                     className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold transition hover:bg-blue-500"
                   >
                     View Matches
                     <ChevronRight size={17} />
-                  </Link>
-
-                  <Link
-                    to="/ai-assistant"
-                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-blue-500/30 bg-blue-500/10 px-5 py-3 text-sm font-semibold text-blue-400 transition hover:bg-blue-500/20"
-                  >
-                    <Bot size={17} />
-                    Ask AI
                   </Link>
                 </div>
               </div>

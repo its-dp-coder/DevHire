@@ -9,6 +9,13 @@ import { Link, useNavigate } from "react-router-dom";
 
 import api from "../services/api";
 
+type CurrentUser = {
+  id: number;
+  full_name: string;
+  email: string;
+  role: "candidate" | "recruiter";
+};
+
 function Login() {
   const navigate = useNavigate();
 
@@ -29,17 +36,27 @@ function Login() {
         password,
       });
 
-      localStorage.setItem(
-        "access_token",
-        response.data.access_token,
-      );
+      const token = response.data.access_token;
 
-      navigate("/dashboard");
+      localStorage.setItem("access_token", token);
+
+      const userResponse =
+        await api.get<CurrentUser>("/auth/me");
+
+      const user = userResponse.data;
+
+      if (user.role === "recruiter") {
+        navigate("/recruiter");
+      } else {
+        navigate("/dashboard");
+      }
     } catch (err: any) {
       console.error(
         "LOGIN ERROR:",
         err.response?.data || err,
       );
+
+      localStorage.removeItem("access_token");
 
       setError(
         err.response?.data?.detail ||
@@ -54,7 +71,6 @@ function Login() {
   return (
     <div className="min-h-screen bg-slate-950 text-white">
       <div className="mx-auto flex min-h-screen max-w-7xl flex-col px-5 sm:px-6 lg:px-8">
-
         <header className="flex h-20 items-center">
           <Link
             to="/"
@@ -66,7 +82,6 @@ function Login() {
 
         <main className="flex flex-1 items-center justify-center py-10 sm:py-12">
           <div className="w-full max-w-md">
-
             <div className="mb-8 text-center">
               <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-400">
                 <LockKeyhole size={25} />
@@ -82,7 +97,6 @@ function Login() {
             </div>
 
             <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-5 shadow-2xl shadow-black/20 backdrop-blur-xl sm:p-8">
-
               {error && (
                 <div className="mb-5 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm leading-6 text-red-400">
                   {error}
@@ -93,7 +107,6 @@ function Login() {
                 onSubmit={handleSubmit}
                 className="space-y-5"
               >
-
                 <div>
                   <label
                     htmlFor="email"
@@ -170,14 +183,15 @@ function Login() {
                     </>
                   )}
                 </button>
-
               </form>
 
               <div className="my-7 flex items-center gap-4">
                 <div className="h-px flex-1 bg-slate-800" />
+
                 <span className="text-xs text-slate-600">
                   DEVHIRE
                 </span>
+
                 <div className="h-px flex-1 bg-slate-800" />
               </div>
 
@@ -191,13 +205,11 @@ function Login() {
                   Create one
                 </Link>
               </p>
-
             </div>
 
             <p className="mt-6 text-center text-xs text-slate-600">
               Secure authentication powered by DevHire API
             </p>
-
           </div>
         </main>
       </div>

@@ -10,12 +10,10 @@ from app.main import app
 
 TEST_DATABASE_URL = settings.test_database_url
 
-
 test_engine = create_engine(
     TEST_DATABASE_URL,
     echo=False,
 )
-
 
 TestingSessionLocal = sessionmaker(
     autocommit=False,
@@ -29,8 +27,6 @@ def setup_test_database():
     Base.metadata.create_all(bind=test_engine)
 
     yield
-
-    Base.metadata.drop_all(bind=test_engine)
 
 
 @pytest.fixture()
