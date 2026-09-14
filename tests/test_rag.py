@@ -5,6 +5,8 @@ from app.models.company import Company
 from app.models.job import Job
 from app.models.user import User
 
+from tests.conftest import TestingSessionLocal
+
 
 def create_recruiter(client):
     email = f"rag-recruiter-{uuid.uuid4().hex}@example.com"
@@ -15,23 +17,13 @@ def create_recruiter(client):
             "full_name": "RAG Recruiter",
             "email": email,
             "password": "password123",
+            "role": "recruiter",
         },
     )
 
     assert response.status_code == 201
 
     user_id = response.json()["id"]
-
-    from app.db.database import SessionLocal
-
-    db = SessionLocal()
-
-    try:
-        user = db.query(User).filter(User.id == user_id).first()
-        user.role = "recruiter"
-        db.commit()
-    finally:
-        db.close()
 
     login_response = client.post(
         "/auth/login",
@@ -55,6 +47,7 @@ def create_candidate(client):
             "full_name": "Python Developer",
             "email": email,
             "password": "password123",
+            "role": "candidate",
         },
     )
 
@@ -62,9 +55,7 @@ def create_candidate(client):
 
     user_id = response.json()["id"]
 
-    from app.db.database import SessionLocal
-
-    db = SessionLocal()
+    db = TestingSessionLocal()
 
     try:
         profile = CandidateProfile(
@@ -109,9 +100,7 @@ def test_ai_assistant_returns_relevant_job_context(client, monkeypatch):
 
     token, recruiter_id = create_recruiter(client)
 
-    from app.db.database import SessionLocal
-
-    db = SessionLocal()
+    db = TestingSessionLocal()
 
     try:
         company = Company(

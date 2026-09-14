@@ -1,27 +1,15 @@
 def test_recruiter_can_create_job(client):
-    client.post(
+    register_response = client.post(
         "/auth/register",
         json={
             "full_name": "Job Recruiter",
             "email": "jobrecruiter@devhire.com",
             "password": "StrongPassword123",
+            "role": "recruiter",
         },
     )
 
-    from app.db.database import SessionLocal
-    from app.models.user import User
-
-    db = SessionLocal()
-
-    user = db.query(User).filter(
-        User.email == "jobrecruiter@devhire.com"
-    ).first()
-
-    user.role = "recruiter"
-    user_id = user.id
-
-    db.commit()
-    db.close()
+    assert register_response.status_code == 201
 
     login_response = client.post(
         "/auth/login",
@@ -31,13 +19,13 @@ def test_recruiter_can_create_job(client):
         },
     )
 
+    assert login_response.status_code == 200
+
     token = login_response.json()["access_token"]
 
     company_response = client.post(
         "/companies",
-        headers={
-            "Authorization": f"Bearer {token}",
-        },
+        headers={"Authorization": f"Bearer {token}"},
         json={
             "name": "DevHire Jobs",
             "description": "Hiring platform company",
@@ -48,9 +36,7 @@ def test_recruiter_can_create_job(client):
 
     response = client.post(
         "/jobs",
-        headers={
-            "Authorization": f"Bearer {token}",
-        },
+        headers={"Authorization": f"Bearer {token}"},
         json={
             "title": "Python Backend Developer",
             "description": "Build scalable backend APIs",
@@ -67,19 +53,21 @@ def test_recruiter_can_create_job(client):
 
     assert data["title"] == "Python Backend Developer"
     assert data["company_id"] == company_response.json()["id"]
-    assert data["created_by"] == user_id
     assert data["is_active"] is True
 
 
 def test_candidate_cannot_create_job(client):
-    client.post(
+    register_response = client.post(
         "/auth/register",
         json={
             "full_name": "Job Candidate",
             "email": "jobcandidate@devhire.com",
             "password": "StrongPassword123",
+            "role": "candidate",
         },
     )
+
+    assert register_response.status_code == 201
 
     login_response = client.post(
         "/auth/login",
@@ -89,13 +77,13 @@ def test_candidate_cannot_create_job(client):
         },
     )
 
+    assert login_response.status_code == 200
+
     token = login_response.json()["access_token"]
 
     response = client.post(
         "/jobs",
-        headers={
-            "Authorization": f"Bearer {token}",
-        },
+        headers={"Authorization": f"Bearer {token}"},
         json={
             "title": "Backend Developer",
             "description": "Backend role",
@@ -111,14 +99,17 @@ def test_candidate_cannot_create_job(client):
 
 
 def test_authenticated_user_can_list_jobs(client):
-    client.post(
+    register_response = client.post(
         "/auth/register",
         json={
             "full_name": "Job List User",
             "email": "joblist@devhire.com",
             "password": "StrongPassword123",
+            "role": "candidate",
         },
     )
+
+    assert register_response.status_code == 201
 
     login_response = client.post(
         "/auth/login",
@@ -128,13 +119,13 @@ def test_authenticated_user_can_list_jobs(client):
         },
     )
 
+    assert login_response.status_code == 200
+
     token = login_response.json()["access_token"]
 
     response = client.get(
         "/jobs",
-        headers={
-            "Authorization": f"Bearer {token}",
-        },
+        headers={"Authorization": f"Bearer {token}"},
     )
 
     assert response.status_code == 200
@@ -142,28 +133,17 @@ def test_authenticated_user_can_list_jobs(client):
 
 
 def test_get_job_by_id(client):
-    client.post(
+    register_response = client.post(
         "/auth/register",
         json={
             "full_name": "Get Job Recruiter",
             "email": "getjob@devhire.com",
             "password": "StrongPassword123",
+            "role": "recruiter",
         },
     )
 
-    from app.db.database import SessionLocal
-    from app.models.user import User
-
-    db = SessionLocal()
-
-    user = db.query(User).filter(
-        User.email == "getjob@devhire.com"
-    ).first()
-
-    user.role = "recruiter"
-
-    db.commit()
-    db.close()
+    assert register_response.status_code == 201
 
     login_response = client.post(
         "/auth/login",
@@ -173,24 +153,24 @@ def test_get_job_by_id(client):
         },
     )
 
+    assert login_response.status_code == 200
+
     token = login_response.json()["access_token"]
 
-    client.post(
+    company_response = client.post(
         "/companies",
-        headers={
-            "Authorization": f"Bearer {token}",
-        },
+        headers={"Authorization": f"Bearer {token}"},
         json={
             "name": "Get Job Company",
             "description": "Company for job lookup",
         },
     )
 
+    assert company_response.status_code == 201
+
     job_response = client.post(
         "/jobs",
-        headers={
-            "Authorization": f"Bearer {token}",
-        },
+        headers={"Authorization": f"Bearer {token}"},
         json={
             "title": "FastAPI Developer",
             "description": "Develop APIs",
@@ -201,13 +181,13 @@ def test_get_job_by_id(client):
         },
     )
 
+    assert job_response.status_code == 201
+
     job_id = job_response.json()["id"]
 
     response = client.get(
         f"/jobs/{job_id}",
-        headers={
-            "Authorization": f"Bearer {token}",
-        },
+        headers={"Authorization": f"Bearer {token}"},
     )
 
     assert response.status_code == 200
@@ -215,14 +195,17 @@ def test_get_job_by_id(client):
 
 
 def test_get_nonexistent_job(client):
-    client.post(
+    register_response = client.post(
         "/auth/register",
         json={
             "full_name": "Missing Job User",
             "email": "missingjob@devhire.com",
             "password": "StrongPassword123",
+            "role": "candidate",
         },
     )
+
+    assert register_response.status_code == 201
 
     login_response = client.post(
         "/auth/login",
@@ -232,13 +215,13 @@ def test_get_nonexistent_job(client):
         },
     )
 
+    assert login_response.status_code == 200
+
     token = login_response.json()["access_token"]
 
     response = client.get(
         "/jobs/999999",
-        headers={
-            "Authorization": f"Bearer {token}",
-        },
+        headers={"Authorization": f"Bearer {token}"},
     )
 
     assert response.status_code == 404

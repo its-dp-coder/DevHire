@@ -3,12 +3,13 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from app.core.config import settings
 from app.db.database import Base, get_db
 from app.main import app
 
 
-TEST_DATABASE_URL = settings.test_database_url
+TEST_DATABASE_URL = (
+    "postgresql+psycopg://postgres:postgres@localhost:5433/devhire_test"
+)
 
 test_engine = create_engine(
     TEST_DATABASE_URL,
@@ -22,11 +23,14 @@ TestingSessionLocal = sessionmaker(
 )
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(autouse=True)
 def setup_test_database():
+    Base.metadata.drop_all(bind=test_engine)
     Base.metadata.create_all(bind=test_engine)
 
     yield
+
+    Base.metadata.drop_all(bind=test_engine)
 
 
 @pytest.fixture()
@@ -41,10 +45,10 @@ def client():
 
     app.dependency_overrides[get_db] = override_get_db
 
-    with TestClient(app) as test_client:
-        yield test_client
-
-    db.rollback()
-    db.close()
-
-    app.dependency_overrides.clear()
+    try:
+        with TestClient(app) as test_client:
+            yield test_client
+    finally:
+        db.rollback()
+        db.close()
+        app.dependency_overrides.clear()

@@ -35,6 +35,13 @@ function AIAssistant() {
 
   useEffect(() => {
     const loadSuggestions = async () => {
+      const defaultSuggestions = [
+        "Which jobs require Python?",
+        "Find candidates with relevant skills",
+        "Which candidates match my jobs?",
+        "Help me review the available candidates",
+      ];
+
       try {
         const response = await api.get<Job[]>("/jobs");
 
@@ -42,7 +49,9 @@ function AIAssistant() {
           ? response.data
           : [];
 
-        const generatedSuggestions: string[] = [];
+        const generatedSuggestions: string[] = [
+          ...defaultSuggestions,
+        ];
 
         jobs.forEach((job) => {
           if (!job.title) {
@@ -79,12 +88,7 @@ function AIAssistant() {
 
         setSuggestions(uniqueSuggestions.slice(0, 4));
       } catch {
-        setSuggestions([
-          "Which jobs are currently available?",
-          "Find candidates with relevant skills",
-          "Which candidates match my jobs?",
-          "Help me review the available candidates",
-        ]);
+        setSuggestions(defaultSuggestions);
       }
     };
 
@@ -175,7 +179,7 @@ function AIAssistant() {
           </h1>
 
           <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-slate-400 sm:text-base">
-            Ask questions about jobs and candidates using DevHire's
+            Ask questions about jobs and candidates using DevHire&apos;s
             hiring data.
           </p>
         </div>
@@ -251,7 +255,7 @@ function AIAssistant() {
                     </span>
                   </div>
 
-                  <div className="rounded-2xl rounded-tl-md border border-white/10 bg-slate-950/60 p-5 text-sm leading-7 text-slate-300 whitespace-pre-wrap">
+                  <div className="whitespace-pre-wrap rounded-2xl rounded-tl-md border border-white/10 bg-slate-950/60 p-5 text-sm leading-7 text-slate-300">
                     {answer}
                   </div>
                 </div>

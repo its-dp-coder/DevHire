@@ -1,25 +1,15 @@
 def create_recruiter_and_job(client):
-    client.post(
+    register_response = client.post(
         "/auth/register",
         json={
             "full_name": "Application Recruiter",
             "email": "application.recruiter@devhire.com",
             "password": "StrongPassword123",
+            "role": "recruiter",
         },
     )
 
-    from app.db.database import SessionLocal
-    from app.models.user import User
-
-    db = SessionLocal()
-
-    user = db.query(User).filter(
-        User.email == "application.recruiter@devhire.com"
-    ).first()
-
-    user.role = "recruiter"
-    db.commit()
-    db.close()
+    assert register_response.status_code == 201
 
     login_response = client.post(
         "/auth/login",
@@ -28,6 +18,8 @@ def create_recruiter_and_job(client):
             "password": "StrongPassword123",
         },
     )
+
+    assert login_response.status_code == 200
 
     token = login_response.json()["access_token"]
 
@@ -39,6 +31,8 @@ def create_recruiter_and_job(client):
             "description": "Hiring company",
         },
     )
+
+    assert company_response.status_code == 201
 
     job_response = client.post(
         "/jobs",
@@ -53,18 +47,23 @@ def create_recruiter_and_job(client):
         },
     )
 
+    assert job_response.status_code == 201
+
     return token, job_response.json()["id"]
 
 
 def create_candidate(client):
-    client.post(
+    register_response = client.post(
         "/auth/register",
         json={
             "full_name": "Application Candidate",
             "email": "application.candidate@devhire.com",
             "password": "StrongPassword123",
+            "role": "candidate",
         },
     )
+
+    assert register_response.status_code == 201
 
     login_response = client.post(
         "/auth/login",
@@ -73,6 +72,8 @@ def create_candidate(client):
             "password": "StrongPassword123",
         },
     )
+
+    assert login_response.status_code == 200
 
     return login_response.json()["access_token"]
 
@@ -174,12 +175,13 @@ def test_candidate_can_view_own_applications(client):
     )
 
     assert response.status_code == 200
+
     applications = response.json()
 
     assert any(
-    application["job_id"] == job_id
-    for application in applications
-)
+        application["job_id"] == job_id
+        for application in applications
+    )
 
 
 def test_recruiter_can_view_job_applications(client):
@@ -205,12 +207,13 @@ def test_recruiter_can_view_job_applications(client):
     )
 
     assert response.status_code == 200
+
     applications = response.json()
 
     assert any(
-    application["job_id"] == job_id
-    for application in applications
-)
+        application["job_id"] == job_id
+        for application in applications
+    )
 
 
 def test_recruiter_can_update_application_status(client):
@@ -227,6 +230,8 @@ def test_recruiter_can_update_application_status(client):
             "cover_letter": "I would love to join your team.",
         },
     )
+
+    assert application_response.status_code == 201
 
     application_id = application_response.json()["id"]
 
@@ -258,6 +263,8 @@ def test_invalid_application_status_rejected(client):
             "cover_letter": "Application.",
         },
     )
+
+    assert application_response.status_code == 201
 
     application_id = application_response.json()["id"]
 

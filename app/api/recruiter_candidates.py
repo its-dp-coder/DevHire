@@ -22,21 +22,6 @@ def get_candidate_for_recruiter(
 ):
     require_role("recruiter")(current_user)
 
-    candidate = (
-        db.query(User)
-        .filter(
-            User.id == candidate_id,
-            User.role == "candidate",
-        )
-        .first()
-    )
-
-    if not candidate:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Candidate not found",
-        )
-
     profile = (
         db.query(CandidateProfile)
         .filter(CandidateProfile.user_id == candidate_id)
@@ -47,6 +32,21 @@ def get_candidate_for_recruiter(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Candidate profile not found",
+        )
+
+    candidate = (
+        db.query(User)
+        .filter(
+            User.id == candidate_id,
+            User.role == "candidate",
+        )
+        .first()
+    )
+
+    if candidate is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Candidate not found",
         )
 
     record_profile_view(
@@ -61,5 +61,15 @@ def get_candidate_for_recruiter(
             "full_name": candidate.full_name,
             "email": candidate.email,
         },
-        "profile": profile,
+        "profile": {
+            "id": profile.id,
+            "user_id": profile.user_id,
+            "headline": profile.headline,
+            "bio": profile.bio,
+            "skills": profile.skills,
+            "experience_years": profile.experience_years,
+            "education": profile.education,
+            "location": profile.location,
+            "resume_url": profile.resume_url,
+        },
     }
