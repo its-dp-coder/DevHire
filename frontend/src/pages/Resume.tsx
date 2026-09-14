@@ -1,15 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
+  ArrowLeft,
   CheckCircle2,
   FileText,
   Loader2,
   Upload,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 import api from "../services/api";
 
 type ResumeItem = {
   id: number;
+  candidate_id?: number;
   file_name: string;
   file_url: string;
   file_type: string;
@@ -19,10 +22,14 @@ type ResumeItem = {
 function Resume() {
   const [resumes, setResumes] = useState<ResumeItem[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
+
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const fetchResumes = async () => {
     try {
@@ -46,6 +53,37 @@ function Resume() {
     fetchResumes();
   }, []);
 
+  const handleFileChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0] || null;
+
+    if (!file) {
+      setSelectedFile(null);
+      return;
+    }
+
+    const extension = file.name
+      .substring(file.name.lastIndexOf("."))
+      .toLowerCase();
+
+    if (![".pdf", ".docx"].includes(extension)) {
+      setSelectedFile(null);
+      setError("Only PDF and DOCX resumes are allowed.");
+      setSuccess("");
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+
+      return;
+    }
+
+    setSelectedFile(file);
+    setError("");
+    setSuccess("");
+  };
+
   const handleUpload = async () => {
     if (!selectedFile) {
       setError("Please select a PDF or DOCX file.");
@@ -58,27 +96,29 @@ function Resume() {
       setSuccess("");
 
       const formData = new FormData();
-
       formData.append("file", selectedFile);
 
-      await api.post("/resumes", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
+      const response = await api.post<ResumeItem>(
+        "/resumes",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         },
-      });
+      );
+
+      setResumes((current) => [
+        response.data,
+        ...current,
+      ]);
 
       setSuccess("Resume uploaded successfully.");
       setSelectedFile(null);
 
-      const fileInput = document.getElementById(
-        "resume-file",
-      ) as HTMLInputElement | null;
-
-      if (fileInput) {
-        fileInput.value = "";
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
       }
-
-      await fetchResumes();
     } catch (err: any) {
       setError(
         err?.response?.data?.detail ||
@@ -91,24 +131,63 @@ function Resume() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
-      <div className="mx-auto max-w-5xl px-5 py-10 sm:px-6 lg:px-8">
-        {/* Header */}
+      <header className="border-b border-white/10">
+        <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-5 sm:px-6 lg:px-8">
+          <Link
+            to="/"
+            className="text-2xl font-bold tracking-tight"
+          >
+            Dev<span className="text-blue-500">Hire</span>
+          </Link>
+
+          <Link
+            to="/dashboard"
+            className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm text-slate-400 transition hover:bg-white/5 hover:text-white"
+          >
+            <ArrowLeft size={17} />
+            Dashboard
+          </Link>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-5xl px-5 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-14">
+        <Link
+          to="/dashboard"
+          className="mb-8 inline-flex items-center gap-2 text-sm text-slate-400 transition hover:text-white"
+        >
+          <ArrowLeft size={17} />
+          Back to dashboard
+        </Link>
+
         <div className="mb-8">
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
             <FileText size={24} />
           </div>
 
-          <h1 className="text-3xl font-bold tracking-tight">
-            Resume
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            My Resume
           </h1>
 
-          <p className="mt-2 text-sm leading-6 text-slate-400">
-            Upload your latest resume to keep your developer profile
-            up to date.
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400 sm:text-base">
+            Upload and manage your resumes. Your uploaded resumes
+            are stored with your DevHire account and remain available
+            after you log out and sign in again.
           </p>
         </div>
 
-        {/* Upload Card */}
+        {error && (
+          <div className="mb-6 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm leading-6 text-red-400">
+            {error}
+          </div>
+        )}
+
+        {success && (
+          <div className="mb-6 flex items-center gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-sm text-emerald-400">
+            <CheckCircle2 size={18} />
+            {success}
+          </div>
+        )}
+
         <section className="rounded-2xl border border-white/10 bg-slate-900/70 p-6 sm:p-8">
           <div className="mb-6">
             <h2 className="text-xl font-semibold">
@@ -120,7 +199,7 @@ function Resume() {
             </p>
           </div>
 
-          <div className="rounded-xl border border-dashed border-white/15 bg-slate-950/50 p-6">
+          <div className="rounded-2xl border border-dashed border-white/15 bg-slate-950/50 p-8">
             <label
               htmlFor="resume-file"
               className="flex cursor-pointer flex-col items-center justify-center text-center"
@@ -138,24 +217,21 @@ function Resume() {
               </p>
 
               <input
+                ref={fileInputRef}
                 id="resume-file"
                 type="file"
                 accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                 className="mt-5 block w-full max-w-sm cursor-pointer rounded-lg border border-white/10 bg-slate-900 text-sm text-slate-400 file:mr-4 file:border-0 file:bg-blue-600 file:px-4 file:py-2.5 file:text-sm file:font-medium file:text-white hover:file:bg-blue-500"
-                onChange={(event) => {
-                  const file = event.target.files?.[0] || null;
-
-                  setSelectedFile(file);
-                  setError("");
-                  setSuccess("");
-                }}
+                onChange={handleFileChange}
               />
             </label>
           </div>
 
           {selectedFile && (
             <div className="mt-4 flex items-center gap-3 rounded-xl border border-blue-500/20 bg-blue-500/5 p-4">
-              <FileText className="h-5 w-5 shrink-0 text-blue-400" />
+              <FileText
+                className="h-5 w-5 shrink-0 text-blue-400"
+              />
 
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium text-slate-200">
@@ -169,28 +245,18 @@ function Resume() {
             </div>
           )}
 
-          {error && (
-            <div className="mt-5 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400">
-              {error}
-            </div>
-          )}
-
-          {success && (
-            <div className="mt-5 flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-sm text-emerald-400">
-              <CheckCircle2 size={18} />
-              {success}
-            </div>
-          )}
-
           <button
             type="button"
             onClick={handleUpload}
             disabled={!selectedFile || loading}
-            className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+            className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3.5 text-sm font-semibold transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
           >
             {loading ? (
               <>
-                <Loader2 className="animate-spin" size={18} />
+                <Loader2
+                  className="animate-spin"
+                  size={18}
+                />
                 Uploading...
               </>
             ) : (
@@ -202,7 +268,6 @@ function Resume() {
           </button>
         </section>
 
-        {/* Resume List */}
         <section className="mt-8 rounded-2xl border border-white/10 bg-slate-900/70 p-6 sm:p-8">
           <div className="mb-6">
             <h2 className="text-xl font-semibold">
@@ -210,7 +275,7 @@ function Resume() {
             </h2>
 
             <p className="mt-1 text-sm text-slate-500">
-              Resumes uploaded to your DevHire profile.
+              All resumes linked to your candidate account.
             </p>
           </div>
 
@@ -276,7 +341,7 @@ function Resume() {
             </div>
           )}
         </section>
-      </div>
+      </main>
     </div>
   );
 }

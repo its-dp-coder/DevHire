@@ -1,17 +1,19 @@
-import { useEffect, useState } from "react";
-import type { FormEvent } from "react";import {
+import { useEffect, useRef, useState } from "react";
+import type { ChangeEvent, FormEvent } from "react";
+import {
   ArrowLeft,
   CheckCircle2,
   FileText,
   MapPin,
   Save,
   Sparkles,
+  Upload,
   UserRound,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import api from "../services/api";
 
-type Profile = {
+type ProfileData = {
   id?: number;
   user_id?: number;
   headline: string;
@@ -23,7 +25,16 @@ type Profile = {
   resume_url: string;
 };
 
-const emptyProfile: Profile = {
+type Resume = {
+  id: number;
+  candidate_id: number;
+  file_name: string;
+  file_url: string;
+  file_type: string;
+  created_at: string;
+};
+
+const emptyProfile: ProfileData = {
   headline: "",
   bio: "",
   skills: "",
@@ -34,20 +45,33 @@ const emptyProfile: Profile = {
 };
 
 function Profile() {
-  const [profile, setProfile] = useState<Profile>(emptyProfile);
+  const [profile, setProfile] = useState<ProfileData>(emptyProfile);
+  const [resumes, setResumes] = useState<Resume[]>([]);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
-    const fetchProfile = async () => {
+    const loadProfileAndResumes = async () => {
       try {
-        const response = await api.get("/candidate-profile");
+        const [profileResponse, resumesResponse] = await Promise.all([
+          api.get("/candidate-profile"),
+          api.get<Resume[]>("/resumes"),
+        ]);
+
         setProfile({
           ...emptyProfile,
-          ...response.data,
+          ...profileResponse.data,
         });
+
+        setResumes(resumesResponse.data);
       } catch (err: any) {
         if (err.response?.status !== 404) {
           setError(
@@ -60,13 +84,11 @@ function Profile() {
       }
     };
 
-    fetchProfile();
+    loadProfileAndResumes();
   }, []);
 
   const handleChange = (
-    event: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement
-    >,
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = event.target;
 
@@ -79,14 +101,97 @@ function Profile() {
     }));
   };
 
+  const handleFileChange = (
+    event: ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      setSelectedFile(null);
+      return;
+    }
+
+    const extension = file.name
+      .substring(file.name.lastIndexOf("."))
+      .toLowerCase();
+
+    if (![".pdf", ".docx"].includes(extension)) {
+      setError("Only PDF and DOCX resumes are allowed.");
+      setSelectedFile(null);
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+
+      return;
+    }
+
+    setError("");
+    setMessage("");
+    setSelectedFile(file);
+  };
+
+  const uploadResume = async () => {
+    if (!selectedFile) {
+      setError("Please choose a PDF or DOCX resume first.");
+      return;
+    }
+
+    try {
+      setUploading(true);
+      setError("");
+      setMessage("");
+
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+
+      const response = await api.post<Resume>(
+        "/resumes",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        },
+      );
+
+      const uploadedResume = response.data;
+
+      setResumes((current) => [
+        uploadedResume,
+        ...current,
+      ]);
+
+      setProfile((current) => ({
+        ...current,
+        resume_url: uploadedResume.file_url,
+      }));
+
+      setSelectedFile(null);
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+
+      setMessage("Resume uploaded successfully.");
+    } catch (err: any) {
+      setError(
+        err.response?.data?.detail ||
+          "Unable to upload resume.",
+      );
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
 
-    setSaving(true);
-    setMessage("");
-    setError("");
-
     try {
+      setSaving(true);
+      setMessage("");
+      setError("");
+
       const response = profile.id
         ? await api.put("/candidate-profile", profile)
         : await api.post("/candidate-profile", profile);
@@ -98,11 +203,6 @@ function Profile() {
 
       setMessage("Profile saved successfully.");
     } catch (err: any) {
-      console.error(
-        "PROFILE ERROR:",
-        err.response?.data || err,
-      );
-
       setError(
         err.response?.data?.detail ||
           "Unable to save your profile.",
@@ -328,6 +428,7 @@ function Profile() {
             </div>
           </div>
 
+          {/* Resume Upload */}
           <div className="mt-6 rounded-2xl border border-white/10 bg-slate-900/60 p-5 sm:p-8">
             <div className="mb-6 flex items-start gap-4">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-violet-500/10 text-violet-400">
@@ -340,21 +441,109 @@ function Profile() {
                 </h2>
 
                 <p className="mt-1 text-sm leading-6 text-slate-500">
-                  Add your resume URL. File upload can be connected to
-                  the resume service later.
+                  Upload your latest resume directly to your DevHire profile.
+                  PDF and DOCX are supported.
                 </p>
               </div>
             </div>
 
-            <input
-              id="resume_url"
-              name="resume_url"
-              type="url"
-              value={profile.resume_url}
-              onChange={handleChange}
-              placeholder="https://example.com/my-resume.pdf"
-              className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3.5 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
-            />
+            <div className="rounded-2xl border border-dashed border-slate-700 bg-slate-950/60 p-6 text-center">
+              <Upload className="mx-auto mb-4 text-blue-400" size={30} />
+
+              <p className="text-sm font-semibold text-slate-200">
+                Choose your resume
+              </p>
+
+              <p className="mt-1 text-xs text-slate-500">
+                PDF or DOCX
+              </p>
+
+              <input
+                ref={fileInputRef}
+                id="resume_file"
+                type="file"
+                accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                onChange={handleFileChange}
+                className="mx-auto mt-5 block w-full max-w-md cursor-pointer rounded-xl border border-slate-700 bg-slate-900 text-sm text-slate-400 file:mr-4 file:border-0 file:bg-blue-600 file:px-4 file:py-3 file:text-sm file:font-semibold file:text-white hover:file:bg-blue-500"
+              />
+
+              {selectedFile && (
+                <p className="mt-4 text-sm text-blue-400">
+                  Selected: {selectedFile.name}
+                </p>
+              )}
+            </div>
+
+            <button
+              type="button"
+              onClick={uploadResume}
+              disabled={uploading || !selectedFile}
+              className="mt-5 inline-flex items-center justify-center gap-2 rounded-xl bg-violet-600 px-6 py-3.5 text-sm font-semibold transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {uploading ? (
+                <>
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-violet-200 border-t-transparent" />
+                  Uploading...
+                </>
+              ) : (
+                <>
+                  <Upload size={17} />
+                  Upload Resume
+                </>
+              )}
+            </button>
+
+            {/* Previous resumes */}
+            {resumes.length > 0 && (
+              <div className="mt-8">
+                <div className="mb-4">
+                  <h3 className="text-lg font-semibold">
+                    Uploaded Resumes
+                  </h3>
+
+                  <p className="mt-1 text-sm text-slate-500">
+                    Your previously uploaded resumes are saved to your account.
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  {resumes.map((resume) => (
+                    <div
+                      key={resume.id}
+                      className="flex flex-col gap-4 rounded-xl border border-white/10 bg-slate-950/60 p-4 sm:flex-row sm:items-center sm:justify-between"
+                    >
+                      <div className="flex min-w-0 items-center gap-3">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-400">
+                          <FileText size={19} />
+                        </div>
+
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium text-slate-200">
+                            {resume.file_name}
+                          </p>
+
+                          <p className="mt-1 text-xs text-slate-600">
+                            Uploaded{" "}
+                            {new Date(
+                              resume.created_at,
+                            ).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+
+                      <a
+                        href={`http://localhost:8000${resume.file_url}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex shrink-0 items-center justify-center rounded-lg border border-white/10 px-4 py-2 text-xs font-semibold text-slate-300 transition hover:bg-white/5 hover:text-white"
+                      >
+                        View Resume
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">

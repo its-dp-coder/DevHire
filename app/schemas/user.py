@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, EmailStr
 
@@ -7,6 +8,7 @@ class UserCreate(BaseModel):
     full_name: str
     email: EmailStr
     password: str
+    role: Literal["candidate", "recruiter"] = "candidate"
 
 
 class LoginRequest(BaseModel):

@@ -14,14 +14,8 @@ from app.repositories.user_repository import (
 from app.schemas.user import UserCreate
 
 
-def register_user(
-    db: Session,
-    user_data: UserCreate,
-) -> User:
-    existing_user = get_user_by_email(
-        db,
-        user_data.email,
-    )
+def register_user(db: Session, user_data: UserCreate) -> User:
+    existing_user = get_user_by_email(db, user_data.email)
 
     if existing_user:
         raise HTTPException(
@@ -32,10 +26,8 @@ def register_user(
     user = User(
         full_name=user_data.full_name,
         email=user_data.email,
-        password_hash=hash_password(
-            user_data.password,
-        ),
-        role="candidate",
+        password_hash=hash_password(user_data.password),
+        role=user_data.role,
     )
 
     return create_user(db, user)
@@ -46,10 +38,7 @@ def authenticate_user(
     email: str,
     password: str,
 ) -> User:
-    user = get_user_by_email(
-        db,
-        email,
-    )
+    user = get_user_by_email(db, email)
 
     if not user:
         raise HTTPException(
@@ -58,10 +47,7 @@ def authenticate_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    if not verify_password(
-        password,
-        user.password_hash,
-    ):
+    if not verify_password(password, user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",

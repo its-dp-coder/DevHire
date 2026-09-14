@@ -2,14 +2,16 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import {
   ArrowRight,
+  BriefcaseBusiness,
   CheckCircle2,
   LockKeyhole,
   Mail,
   UserRound,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-
 import api from "../services/api";
+
+type Role = "candidate" | "recruiter";
 
 function Register() {
   const navigate = useNavigate();
@@ -17,11 +19,12 @@ function Register() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState<Role>("candidate");
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (event: FormEvent) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     setError("");
@@ -32,14 +35,12 @@ function Register() {
         full_name: fullName,
         email,
         password,
+        role,
       });
 
       navigate("/login");
     } catch (err: any) {
-      console.error(
-        "REGISTER ERROR:",
-        err.response?.data || err,
-      );
+      console.error("REGISTER ERROR:", err.response?.data || err);
 
       setError(
         err.response?.data?.detail ||
@@ -55,7 +56,6 @@ function Register() {
     <div className="min-h-screen bg-slate-950 text-white">
       <div className="mx-auto flex min-h-screen max-w-7xl flex-col px-5 sm:px-6 lg:px-8">
 
-        {/* Header */}
         <header className="flex h-20 items-center justify-between">
           <Link
             to="/"
@@ -75,11 +75,9 @@ function Register() {
           </Link>
         </header>
 
-        {/* Main */}
         <main className="flex flex-1 items-center justify-center py-10 sm:py-12 lg:py-16">
           <div className="grid w-full max-w-5xl items-center gap-12 lg:grid-cols-2">
 
-            {/* Left Content */}
             <div className="hidden lg:block">
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-4 py-2 text-sm text-blue-400">
                 <CheckCircle2 size={16} />
@@ -95,18 +93,18 @@ function Register() {
 
               <p className="mt-6 max-w-lg text-lg leading-8 text-slate-400">
                 Create your developer profile, discover relevant
-                opportunities, and connect with companies using
-                intelligent job matching.
+                opportunities, or recruit talented developers using
+                DevHire.
               </p>
 
               <div className="mt-8 space-y-4">
                 <Benefit text="AI-powered job matching" />
                 <Benefit text="Professional developer profiles" />
+                <Benefit text="Recruiter job management" />
                 <Benefit text="Secure recruitment workflow" />
               </div>
             </div>
 
-            {/* Register Card */}
             <div className="w-full max-w-md justify-self-center lg:max-w-lg">
 
               <div className="mb-7 text-center">
@@ -119,13 +117,12 @@ function Register() {
                 </h2>
 
                 <p className="mt-3 text-sm leading-6 text-slate-400 sm:text-base">
-                  Start your journey with DevHire.
+                  Choose how you want to use DevHire.
                 </p>
               </div>
 
               <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-5 shadow-2xl shadow-black/20 backdrop-blur-xl sm:p-8">
 
-                {/* Error */}
                 {error && (
                   <div className="mb-5 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm leading-6 text-red-400">
                     {error}
@@ -137,7 +134,67 @@ function Register() {
                   className="space-y-5"
                 >
 
-                  {/* Full Name */}
+                  <div>
+                    <label className="mb-3 block text-sm font-medium text-slate-300">
+                      I want to
+                    </label>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setRole("candidate")}
+                        className={`rounded-xl border p-4 text-left transition ${
+                          role === "candidate"
+                            ? "border-blue-500 bg-blue-500/10"
+                            : "border-white/10 bg-slate-950 hover:border-white/20"
+                        }`}
+                      >
+                        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10 text-blue-400">
+                          <UserRound size={20} />
+                        </div>
+
+                        <p className="text-sm font-semibold text-white">
+                          Find a job
+                        </p>
+
+                        <p className="mt-1 text-xs leading-5 text-slate-500">
+                          Create a profile and apply for jobs.
+                        </p>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setRole("recruiter")}
+                        className={`rounded-xl border p-4 text-left transition ${
+                          role === "recruiter"
+                            ? "border-blue-500 bg-blue-500/10"
+                            : "border-white/10 bg-slate-950 hover:border-white/20"
+                        }`}
+                      >
+                        <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10 text-blue-400">
+                          <BriefcaseBusiness size={20} />
+                        </div>
+
+                        <p className="text-sm font-semibold text-white">
+                          Hire developers
+                        </p>
+
+                        <p className="mt-1 text-xs leading-5 text-slate-500">
+                          Create jobs and manage candidates.
+                        </p>
+                      </button>
+                    </div>
+
+                    <p className="mt-2 text-xs text-slate-600">
+                      Selected:{" "}
+                      <span className="text-blue-400">
+                        {role === "candidate"
+                          ? "Candidate"
+                          : "Recruiter"}
+                      </span>
+                    </p>
+                  </div>
+
                   <div>
                     <label
                       htmlFor="fullName"
@@ -167,7 +224,6 @@ function Register() {
                     </div>
                   </div>
 
-                  {/* Email */}
                   <div>
                     <label
                       htmlFor="email"
@@ -197,7 +253,6 @@ function Register() {
                     </div>
                   </div>
 
-                  {/* Password */}
                   <div>
                     <label
                       htmlFor="password"
@@ -232,7 +287,6 @@ function Register() {
                     </p>
                   </div>
 
-                  {/* Button */}
                   <button
                     type="submit"
                     disabled={loading}
@@ -246,7 +300,6 @@ function Register() {
                     ) : (
                       <>
                         Create Account
-
                         <ArrowRight
                           size={18}
                           className="transition-transform group-hover:translate-x-1"
@@ -256,7 +309,6 @@ function Register() {
                   </button>
                 </form>
 
-                {/* Divider */}
                 <div className="my-7 flex items-center gap-4">
                   <div className="h-px flex-1 bg-slate-800" />
 
@@ -269,7 +321,6 @@ function Register() {
 
                 <p className="text-center text-sm text-slate-400">
                   Already have an account?{" "}
-
                   <Link
                     to="/login"
                     className="font-semibold text-blue-400 transition hover:text-blue-300"
@@ -290,7 +341,6 @@ function Register() {
   );
 }
 
-
 function Benefit({ text }: { text: string }) {
   return (
     <div className="flex items-center gap-3 text-sm text-slate-300">
@@ -298,11 +348,9 @@ function Benefit({ text }: { text: string }) {
         size={18}
         className="shrink-0 text-blue-500"
       />
-
       <span>{text}</span>
     </div>
   );
 }
-
 
 export default Register;
