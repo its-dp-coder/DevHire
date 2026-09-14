@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import {
   BriefcaseBusiness,
+  Building2,
   CheckCircle2,
   Users,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+
 import api from "../services/api";
 
 type Application = {
@@ -23,7 +25,10 @@ function RecruiterDashboard() {
   useEffect(() => {
     const fetchApplications = async () => {
       try {
-        const response = await api.get("/applications/recruiter");
+        const response = await api.get<Application[]>(
+          "/applications/recruiter",
+        );
+
         setApplications(response.data);
       } catch (err: any) {
         console.error(
@@ -50,7 +55,7 @@ function RecruiterDashboard() {
     try {
       setError("");
 
-      const response = await api.patch(
+      const response = await api.patch<Application>(
         `/applications/${applicationId}/status`,
         { status },
       );
@@ -80,6 +85,7 @@ function RecruiterDashboard() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
+      {/* Header */}
       <header className="border-b border-white/10">
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 sm:px-6 lg:px-8">
           <Link
@@ -103,47 +109,69 @@ function RecruiterDashboard() {
             >
               Jobs
             </Link>
+
+            <Link
+              to="/company"
+              className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-white/5 hover:text-white"
+            >
+              <Building2 size={16} />
+              Company
+            </Link>
           </div>
         </div>
       </header>
 
       <main className="mx-auto max-w-7xl px-5 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-14">
-<div className="mb-10 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-  <div>
-    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
-      <Users size={23} />
-    </div>
+        {/* Heading */}
+        <div className="mb-10 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
+              <Users size={23} />
+            </div>
 
-    <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-      Recruiter Dashboard
-    </h1>
+            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+              Recruiter Dashboard
+            </h1>
 
-    <p className="mt-3 text-sm text-slate-400 sm:text-base">
-      Manage candidate applications and recruitment activity.
-    </p>
-  </div>
+            <p className="mt-3 text-sm text-slate-400 sm:text-base">
+              Manage candidate applications, companies, and
+              recruitment activity.
+            </p>
+          </div>
 
-  <Link
-    to="/recruiter/jobs/new"
-    className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold transition hover:bg-blue-500"
-  >
-    <BriefcaseBusiness size={17} />
-    Post a Job
-  </Link>
-</div>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Link
+              to="/company"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 px-5 py-3 text-sm font-semibold text-slate-300 transition hover:bg-white/5 hover:text-white"
+            >
+              <Building2 size={17} />
+              Manage Company
+            </Link>
 
-{error && (
-  <div className="mb-6 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm leading-6 text-red-400">
-    {error}
-  </div>
-)}
+            <Link
+              to="/recruiter/jobs/new"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold transition hover:bg-blue-500"
+            >
+              <BriefcaseBusiness size={17} />
+              Post a Job
+            </Link>
+          </div>
+        </div>
 
-<div className="mb-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-  <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6">
-    <BriefcaseBusiness
-      size={22}
-      className="text-blue-400"
-    />
+        {/* Error */}
+        {error && (
+          <div className="mb-6 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm leading-6 text-red-400">
+            {error}
+          </div>
+        )}
+
+        {/* Stats */}
+        <div className="mb-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6">
+            <BriefcaseBusiness
+              size={22}
+              className="text-blue-400"
+            />
 
             <p className="mt-5 text-sm text-slate-500">
               Applications
@@ -185,6 +213,58 @@ function RecruiterDashboard() {
           </div>
         </div>
 
+        {/* Recruiter Actions */}
+        <section className="mb-8 grid gap-5 md:grid-cols-2">
+          <Link
+            to="/company"
+            className="group rounded-2xl border border-white/10 bg-slate-900/60 p-6 transition hover:-translate-y-0.5 hover:border-emerald-500/30 hover:bg-slate-900"
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400">
+                <Building2 size={21} />
+              </div>
+
+              <span className="text-sm text-slate-600 transition group-hover:text-emerald-400">
+                Manage →
+              </span>
+            </div>
+
+            <h2 className="mt-5 text-lg font-semibold">
+              Company Management
+            </h2>
+
+            <p className="mt-2 text-sm leading-6 text-slate-400">
+              Create and manage your company profile before
+              publishing developer jobs.
+            </p>
+          </Link>
+
+          <Link
+            to="/recruiter/jobs/new"
+            className="group rounded-2xl border border-white/10 bg-slate-900/60 p-6 transition hover:-translate-y-0.5 hover:border-blue-500/30 hover:bg-slate-900"
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
+                <BriefcaseBusiness size={21} />
+              </div>
+
+              <span className="text-sm text-slate-600 transition group-hover:text-blue-400">
+                Create →
+              </span>
+            </div>
+
+            <h2 className="mt-5 text-lg font-semibold">
+              Post Developer Job
+            </h2>
+
+            <p className="mt-2 text-sm leading-6 text-slate-400">
+              Publish a new developer opportunity and start
+              receiving applications.
+            </p>
+          </Link>
+        </section>
+
+        {/* Applications */}
         <section className="rounded-2xl border border-white/10 bg-slate-900/60">
           <div className="border-b border-white/10 p-6">
             <h2 className="text-xl font-semibold">
@@ -222,7 +302,7 @@ function RecruiterDashboard() {
                   key={application.id}
                   className="flex flex-col gap-5 p-6 lg:flex-row lg:items-center lg:justify-between"
                 >
-                  <div>
+                  <div className="min-w-0">
                     <h3 className="font-semibold">
                       Application #{application.id}
                     </h3>
@@ -275,6 +355,12 @@ function RecruiterDashboard() {
             </div>
           )}
         </section>
+
+        {/* Footer */}
+        <footer className="mt-12 border-t border-white/10 pt-6 text-center text-xs text-slate-600">
+          © {new Date().getFullYear()} DevHire. AI-powered
+          developer hiring platform.
+        </footer>
       </main>
     </div>
   );

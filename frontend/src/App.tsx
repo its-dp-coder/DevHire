@@ -28,6 +28,7 @@ import Resume from "./pages/Resume";
 import RecruiterDashboard from "./pages/RecruiterDashboard";
 import CreateJob from "./pages/CreateJob";
 import Applications from "./pages/Applications";
+import Company from "./pages/Company";
 
 function Navbar() {
   const [open, setOpen] = useState(false);
@@ -457,6 +458,7 @@ function App() {
 
   <Route path="/resume" element={<Resume />} />
 <Route path="/applications" element={<Applications />} />
+<Route path="/company" element={<Company />} />
   <Route path="/jobs" element={<Jobs />} />
 
   <Route path="/jobs/:jobId" element={<JobDetails />} />
