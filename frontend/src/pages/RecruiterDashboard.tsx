@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import {
+  Bot,
   BriefcaseBusiness,
   Building2,
   CheckCircle2,
+  Sparkles,
   Users,
 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -117,6 +119,14 @@ function RecruiterDashboard() {
               <Building2 size={16} />
               Company
             </Link>
+
+            <Link
+              to="/ai-assistant"
+              className="inline-flex items-center gap-2 rounded-xl border border-blue-500/20 bg-blue-500/10 px-4 py-2 text-sm font-medium text-blue-400 transition hover:border-blue-500/30 hover:bg-blue-500/15 hover:text-blue-300"
+            >
+              <Bot size={16} />
+              AI Assistant
+            </Link>
           </div>
         </div>
       </header>
@@ -214,7 +224,7 @@ function RecruiterDashboard() {
         </div>
 
         {/* Recruiter Actions */}
-        <section className="mb-8 grid gap-5 md:grid-cols-2">
+        <section className="mb-8 grid gap-5 md:grid-cols-3">
           <Link
             to="/company"
             className="group rounded-2xl border border-white/10 bg-slate-900/60 p-6 transition hover:-translate-y-0.5 hover:border-emerald-500/30 hover:bg-slate-900"
@@ -260,6 +270,31 @@ function RecruiterDashboard() {
             <p className="mt-2 text-sm leading-6 text-slate-400">
               Publish a new developer opportunity and start
               receiving applications.
+            </p>
+          </Link>
+
+          <Link
+            to="/ai-assistant"
+            className="group rounded-2xl border border-blue-500/20 bg-blue-500/5 p-6 transition hover:-translate-y-0.5 hover:border-blue-500/40 hover:bg-blue-500/10"
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
+                <Bot size={21} />
+              </div>
+
+              <Sparkles
+                size={18}
+                className="text-blue-400 opacity-60 transition group-hover:opacity-100"
+              />
+            </div>
+
+            <h2 className="mt-5 text-lg font-semibold">
+              AI Recruitment Assistant
+            </h2>
+
+            <p className="mt-2 text-sm leading-6 text-slate-400">
+              Ask AI questions about candidates, jobs, skills,
+              and recruitment data.
             </p>
           </Link>
         </section>

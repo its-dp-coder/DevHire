@@ -29,6 +29,7 @@ import RecruiterDashboard from "./pages/RecruiterDashboard";
 import CreateJob from "./pages/CreateJob";
 import Applications from "./pages/Applications";
 import Company from "./pages/Company";
+import AIAssistant from "./pages/AIAssistant";
 
 function Navbar() {
   const [open, setOpen] = useState(false);
@@ -459,6 +460,7 @@ function App() {
   <Route path="/resume" element={<Resume />} />
 <Route path="/applications" element={<Applications />} />
 <Route path="/company" element={<Company />} />
+<Route path="/ai-assistant" element={<AIAssistant />} />
   <Route path="/jobs" element={<Jobs />} />
 
   <Route path="/jobs/:jobId" element={<JobDetails />} />

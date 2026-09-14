@@ -1,4 +1,5 @@
 import {
+  Bot,
   BriefcaseBusiness,
   Building2,
   ChevronRight,
@@ -85,6 +86,14 @@ function Dashboard() {
             </Link>
 
             <Link
+              to="/ai-assistant"
+              className="flex items-center gap-3 rounded-xl border border-blue-500/20 bg-blue-500/10 px-4 py-3 text-sm font-medium text-blue-400 transition hover:bg-blue-500/15 hover:text-blue-300"
+            >
+              <Bot size={19} />
+              AI Assistant
+            </Link>
+
+            <Link
               to="/resume"
               className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-400 transition hover:bg-white/5 hover:text-white"
             >
@@ -149,7 +158,7 @@ function Dashboard() {
             </div>
 
             {/* Mobile Navigation */}
-            <div className="mb-8 grid grid-cols-3 gap-3 sm:grid-cols-5 lg:hidden">
+            <div className="mb-8 grid grid-cols-3 gap-3 sm:grid-cols-6 lg:hidden">
               <Link
                 to="/dashboard"
                 className="flex flex-col items-center gap-2 rounded-xl border border-blue-500/20 bg-blue-500/10 p-3 text-xs font-medium text-blue-400"
@@ -180,6 +189,14 @@ function Dashboard() {
               >
                 <Sparkles size={18} />
                 Matching
+              </Link>
+
+              <Link
+                to="/ai-assistant"
+                className="flex flex-col items-center gap-2 rounded-xl border border-blue-500/20 bg-blue-500/10 p-3 text-xs font-medium text-blue-400"
+              >
+                <Bot size={18} />
+                AI Assistant
               </Link>
 
               <Link
@@ -341,6 +358,32 @@ function Dashboard() {
                   </p>
                 </Link>
 
+                {/* AI Assistant */}
+                <Link
+                  to="/ai-assistant"
+                  className="group rounded-2xl border border-blue-500/20 bg-blue-500/5 p-6 transition hover:-translate-y-0.5 hover:border-blue-500/40 hover:bg-blue-500/10"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400">
+                      <Bot size={22} />
+                    </div>
+
+                    <Sparkles
+                      size={20}
+                      className="text-blue-400 transition group-hover:scale-110"
+                    />
+                  </div>
+
+                  <h3 className="mt-5 text-lg font-semibold">
+                    AI Recruitment Assistant
+                  </h3>
+
+                  <p className="mt-2 text-sm leading-6 text-slate-400">
+                    Ask AI about candidates, jobs, skills, and
+                    recruitment data using grounded hiring context.
+                  </p>
+                </Link>
+
                 {/* Resume */}
                 <Link
                   to="/resume"
@@ -378,23 +421,31 @@ function Dashboard() {
                   </div>
 
                   <h2 className="text-2xl font-bold">
-                    AI-powered job matching is ready.
+                    AI-powered developer tools are ready.
                   </h2>
 
                   <p className="mt-3 text-sm leading-6 text-slate-400 sm:text-base">
-                    DevHire analyzes your developer skills and job
-                    requirements to calculate intelligent candidate-job
-                    matches.
+                    Use AI job matching to discover relevant roles,
+                    or ask the AI Recruitment Assistant questions
+                    about DevHire hiring data.
                   </p>
                 </div>
 
-                <div className="shrink-0">
+                <div className="flex shrink-0 flex-col gap-3 sm:flex-row">
                   <Link
                     to="/matching"
-                    className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold transition hover:bg-blue-500"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold transition hover:bg-blue-500"
                   >
                     View Matches
                     <ChevronRight size={17} />
+                  </Link>
+
+                  <Link
+                    to="/ai-assistant"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-blue-500/30 bg-blue-500/10 px-5 py-3 text-sm font-semibold text-blue-400 transition hover:bg-blue-500/20"
+                  >
+                    <Bot size={17} />
+                    Ask AI
                   </Link>
                 </div>
               </div>
