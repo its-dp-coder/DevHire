@@ -12,6 +12,21 @@ jobs:
   backend:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: devhire_test
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d devhire_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,12 +44,13 @@ jobs:
           APP_ENV: test
           APP_NAME: DevHire API
           SECRET_KEY: test-secret-key
-          DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/devhire_db
-          TEST_DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/devhire_test
+          DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5433/devhire_test
+          TEST_DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5433/devhire_test
           ALGORITHM: HS256
           ACCESS_TOKEN_EXPIRE_MINUTES: 30
           REDIS_URL: redis://localhost:6379/0
-        run: pytest
+          PYTHONPATH: .
+        run: python -m pytest
 
   frontend:
     runs-on: ubuntu-latest
