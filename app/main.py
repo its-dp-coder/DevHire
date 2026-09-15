@@ -52,6 +52,16 @@ app.include_router(health_router)
 app.include_router(profile_view_router)
 app.include_router(recruiter_candidates_router)
 
+
+@app.get("/")
+def root():
+    return {
+        "message": "DevHire API is running",
+        "docs": "/docs",
+        "health": "/health",
+    }
+
+
 @app.get("/health")
 def health_check():
     return {
